@@ -25,7 +25,7 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
       
       - name: Convert Case of Repository and Organization
-        # id: repository_full_name
+        id: repository_full_name
         uses: ASzc/change-string-case-action@v2
         with:
           repository_full_name: ${{ github.event.repository.full_name }}
