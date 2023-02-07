@@ -25,6 +25,7 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
       
       - name: Convert Case of Repository and Organization
+        # id: repository_full_name
         uses: ASzc/change-string-case-action@v2
         with:
           repository_full_name: ${{ github.event.repository.full_name }}
@@ -35,5 +36,5 @@ jobs:
           context: .
           push: true
           # tags: "${{ github.event.repository.full_name }}:${{ steps.meta.outputs.tags }},${{ github.event.repository.full_name }}:${{ github.sha }}" 
-          tags: "${{ steps.repository_full_name.lowercase }}:${{ github.sha }}" 
+          tags: "${{ steps.repository_full_name.outputs.lowercase }}:${{ github.sha }}" 
           labels: ${{ steps.meta.outputs.labels }}
