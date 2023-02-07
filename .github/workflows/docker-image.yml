@@ -24,11 +24,16 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
       
+      - name: Convert Case of Repository and Organization
+        uses: ASzc/change-string-case-action@v2
+        with:
+          repository_full_name: ${{ github.event.repository.full_name }}
+      
       - name: Build and push Docker image
         uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
         with:
           context: .
           push: true
           # tags: "${{ github.event.repository.full_name }}:${{ steps.meta.outputs.tags }},${{ github.event.repository.full_name }}:${{ github.sha }}" 
-          tags: "${{ github.event.repository.full_name }}:${{ github.sha }}" 
+          tags: "${{ steps.repository_full_name.lowercase }}:${{ github.sha }}" 
           labels: ${{ steps.meta.outputs.labels }}
