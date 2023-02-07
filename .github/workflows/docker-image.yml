@@ -35,5 +35,5 @@ jobs:
         with:
           context: .
           push: true
-          tags: "${{ steps.repository_full_name.outputs.lowercase }}:${{ steps.meta.outputs.tags }},${{ ${{ steps.repository_full_name.outputs.lowercase }}:${{ github.sha }}" 
+          tags: "${{ steps.repository_full_name.outputs.lowercase }}:${{ steps.meta.outputs.tags }},${{ steps.repository_full_name.outputs.lowercase }}:${{ github.sha }}" 
           labels: ${{ steps.meta.outputs.labels }}
