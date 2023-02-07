@@ -28,7 +28,7 @@ jobs:
         id: repository_full_name
         uses: ASzc/change-string-case-action@v2
         with:
-          repository_full_name: ${{ github.event.repository.full_name }}
+          string: ${{ github.event.repository.full_name }}
       
       - name: Build and push Docker image
         uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
