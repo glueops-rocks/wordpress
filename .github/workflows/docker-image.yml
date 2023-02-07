@@ -24,16 +24,13 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
       
-      - name: Convert Case of Repository and Organization
-        id: repository_full_name
-        uses: ASzc/change-string-case-action@v2
-        with:
-          string: ${{ github.event.repository.full_name }}
+      - name: Generate Variables for Tags
+        uses: rlespinasse/github-slug-action@v4
       
       - name: Build and push Docker image
         uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
         with:
           context: .
           push: true
-          tags: "${{ steps.repository_full_name.outputs.lowercase }}:${{ steps.meta.outputs.tags }},${{ steps.repository_full_name.outputs.lowercase }}:${{ github.sha }}" 
+          tags: "${{ env.GITHUB_REPOSITORY_SLUG }}:${{ env.GITHUB_REF_SLUG }},${{ env.GITHUB_REPOSITORY_SLUG }}:${{ github.sha }}" 
           labels: ${{ steps.meta.outputs.labels }}
