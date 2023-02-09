@@ -1,39 +1,26 @@
-FROM ubuntu:20.04
+FROM ubuntu:18.04
 
-# Update the package list and install necessary packages
-RUN apt-get update && \
-    apt-get install -y software-properties-common && \
-    add-apt-repository universe && \
-    apt-get update && \
-    apt-get install -y \
-    apache2 \
-    php7.4 \
-    libapache2-mod-php7.4 \
-    php7.4-mysql \
-    php7.4-gd \
-    curl \
-    unzip \
-    mysql-client
+# Install dependencies
+RUN apt-get update && apt-get install -y apache2 curl wget nano php7.2 libapache2-mod-php7.2 php7.2-mysql php7.2-curl php7.2-gd php7.2-intl php7.2-mbstring php7.2-soap php7.2-xml php7.2-zip
 
 # Set the timezone
-ENV TZ=America/Los_Angeles
+ENV TZ=UTC
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
-# Download WordPress and the custom theme
-RUN curl -O https://wordpress.org/latest.tar.gz && \
-    tar -zxvf latest.tar.gz && \
-    mv wordpress /var/www/html && \
-    rm latest.tar.gz && \
-    curl -O https://downloads.wordpress.org/theme/twentynineteen.2.7.zip && \
-    unzip twentynineteen.2.7.zip && \
-    mv twentynineteen /var/www/html/wp-content/themes/
+# Download WordPress
+RUN wget https://wordpress.org/latest.tar.gz
+RUN tar xzf latest.tar.gz
+RUN rm latest.tar.gz
+RUN mv wordpress /var/www/html/
 
-# Configure Apache and PHP
+# Configure Apache
 COPY wordpress.conf /etc/apache2/sites-enabled/
 COPY fastcgi-php.conf /etc/apache2/snippets/
-RUN chown -R www-data:www-data /var/www/html && \
-    a2enmod rewrite && \
-    a2enmod headers
+RUN a2enmod rewrite
+RUN a2dissite 000-default.conf
 
-# Start Apache in the foreground
-CMD ["apachectl", "-D", "FOREGROUND"]
+# Copy custom theme to the WordPress installation
+COPY themes/twentyseventeen /var/www/html/wp-content/themes/
+
+EXPOSE 80
+CMD ["apache2ctl", "-D", "FOREGROUND"]
