@@ -20,6 +20,7 @@ RUN curl -L https://downloads.wordpress.org/theme/twentytwenty.1.7.zip -o twenty
 # Set up Apache
 RUN a2enmod rewrite
 COPY wordpress.conf /etc/apache2/sites-available/
+COPY fastcgi-php.conf /etc/apache2/snippets/fastcgi-php.conf
 RUN a2dissite 000-default.conf && a2ensite wordpress.conf
 
 # Expose port 80
