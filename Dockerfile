@@ -1,28 +1,39 @@
-# Use Ubuntu as the base image
 FROM ubuntu:20.04
+
+# Update the package list and install necessary packages
+RUN apt-get update && \
+    apt-get install -y software-properties-common && \
+    add-apt-repository universe && \
+    apt-get update && \
+    apt-get install -y \
+    apache2 \
+    php7.4 \
+    libapache2-mod-php7.4 \
+    php7.4-mysql \
+    php7.4-gd \
+    curl \
+    unzip \
+    mysql-client
 
 # Set the timezone
 ENV TZ=America/Los_Angeles
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
-# Install necessary packages
-RUN apt-get update && \
-    apt-get install -y \
-    apache2 \
-    php \
-    libapache2-mod-php \
-    php-mysql \
-    curl \
-    wget \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
+# Download WordPress and the custom theme
+RUN curl -O https://wordpress.org/latest.tar.gz && \
+    tar -zxvf latest.tar.gz && \
+    mv wordpress /var/www/html && \
+    rm latest.tar.gz && \
+    curl -O https://downloads.wordpress.org/theme/twentynineteen.2.7.zip && \
+    unzip twentynineteen.2.7.zip && \
+    mv twentynineteen /var/www/html/wp-content/themes/
 
-# Copy fastcgi-php.conf file
-COPY fastcgi-php.conf /etc/apache2/snippets/
-
-# Enable the Apache rewrite module
-RUN a2enmod rewrite
-
-# Add the Apache virtual host configuration for WordPress
+# Configure Apache and PHP
 COPY wordpress.conf /etc/apache2/sites-enabled/
+COPY fastcgi-php.conf /etc/apache2/snippets/
+RUN chown -R www-data:www-data /var/www/html && \
+    a2enmod rewrite && \
+    a2enmod headers
 
-# Start the Apache service
-CMD ["/usr/sbin/apache2ctl", "-D", "FOREGROUND"]
+# Start Apache in the foreground
+CMD ["apachectl", "-D", "FOREGROUND"]
