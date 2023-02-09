@@ -1,22 +1,19 @@
-FROM php:7.4-apache
+FROM ubuntu:20.04
 
-# Install dependencies
-RUN apt-get update && apt-get install -y \
-    curl \
-    unzip
+RUN apt-get update && \
+    apt-get install -y curl unzip apache2 php libapache2-mod-php php-mysql
 
-# Download and extract the latest Wordpress
-RUN curl -L https://wordpress.org/latest.tar.gz | tar xz -C /var/www/html --strip-components=1
+WORKDIR /var/www/html
 
-# Download and extract the twentytwenty theme
-RUN curl -L https://downloads.wordpress.org/theme/twentytwenty.1.7.zip -o twentytwenty.zip \
-    && unzip twentytwenty.zip -d /var/www/html/wp-content/themes/ \
-    && rm twentytwenty.zip
+RUN curl -L https://wordpress.org/latest.tar.gz | tar xz --strip-components=1
 
-# Set the twentytwenty theme as the default theme
-RUN echo 'define("WP_DEFAULT_THEME", "twentytwenty");' >> /var/www/html/wp-config.php
+RUN curl -L https://downloads.wordpress.org/theme/twentytwenty.1.7.zip -o twentytwenty.zip && \
+    unzip twentytwenty.zip -d wp-content/themes/ && \
+    rm twentytwenty.zip && \
+    echo 'define("WP_DEFAULT_THEME", "twentytwenty");' >> wp-config.php
 
-# Set the Apache document root
-ENV APACHE_DOCUMENT_ROOT /var/www/html
-RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
-RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
+RUN chown -R www-data:www-data /var/www/html
+
+EXPOSE 80
+
+CMD ["/usr/sbin/apache2ctl", "-D", "FOREGROUND"]
