@@ -1,23 +1,28 @@
+# Use Ubuntu as the base image
 FROM ubuntu:20.04
 
-RUN apt-get update && apt-get install -y \
+# Set the timezone
+ENV TZ=America/Los_Angeles
+
+# Install necessary packages
+RUN apt-get update && \
+    apt-get install -y \
     apache2 \
-    curl \
-    unzip \
     php \
-    libapache2-mod-php
+    libapache2-mod-php \
+    php-mysql \
+    curl \
+    wget \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-RUN curl -L https://wordpress.org/latest.tar.gz | tar xz -C /var/www/html --strip-components=1
+# Copy fastcgi-php.conf file
+COPY fastcgi-php.conf /etc/apache2/snippets/
 
-COPY fastcgi-php.conf /etc/apache2/snippets/fastcgi-php.conf
+# Enable the Apache rewrite module
+RUN a2enmod rewrite
 
-RUN curl -L https://downloads.wordpress.org/theme/twentytwenty.1.7.zip -o twentytwenty.zip && \
-    unzip twentytwenty.zip -d /var/www/html/wp-content/themes/ && \
-    rm twentytwenty.zip && \
-    echo 'define("WP_DEFAULT_THEME", "twentytwenty");' >> /var/www/html/wp-config.php
+# Add the Apache virtual host configuration for WordPress
+COPY wordpress.conf /etc/apache2/sites-enabled/
 
-COPY wordpress.conf /etc/apache2/sites-enabled/wordpress.conf
-
-EXPOSE 80
-
-CMD ["apache2ctl", "-D", "FOREGROUND"]
+# Start the Apache service
+CMD ["/usr/sbin/apache2ctl", "-D", "FOREGROUND"]
